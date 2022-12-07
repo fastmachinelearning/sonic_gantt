@@ -1,0 +1,116 @@
+project sonic_cms "SONIC in CMS" 2022-03-21 +1y {
+  # Set the default time zone for the project. If not specified, UTC
+  # is used.
+  timezone "America/Chicago"
+  # Hide the clock time. Only show the date.
+  timeformat "%Y-%m-%d"
+  # Use US format for numbers
+  numberformat "-" "" "," "." 1
+  # Use US financial format for currency values. Don't show cents.
+  currencyformat "(" ")" "," "." 0
+  # Pick a day during the project that will be reported as 'today' in
+  # the project reports. If not specified, the current day will be
+  # used, but this will likely be outside of the project range, so it
+  # can't be seen in the reports.
+#  now 2002-03-05-13:00
+  # The currency for all money values is the US Dollar.
+  currency "USD"
+}
+
+resource kevin "Kevin Pedro" {
+}
+
+resource patrick "Patrick McCormack" {
+}
+
+resource yongbin "Yongbin Feng" {
+}
+
+task miniaod "MiniAOD Porting" {
+	task pnet "ParticleNet" {
+		task present "ParticleNet presentation (JME)" {
+			start 2022-03-28
+			duration 1d
+			allocate patrick
+			complete 100
+			journalentry 2022-03-28 "link" {
+				author patrick
+				details "[https://indico.cern.ch/event/1143469/#34-particlenet-and-deepmet-wit]"
+			}
+		}
+		task pr "ParticleNet PRs: CMSSW, cms-data" {
+			start 2022-03-29
+			duration 6d
+			allocate patrick
+			depends !present
+			complete 100
+			note "Organization of model files; modifier vs. customization function; update for minor SONIC interface changes in rebase"
+		}
+	}
+}
+
+# Now the project has been specified completely. Stopping here would
+# result in a valid TaskJuggler file that could be processed and
+# scheduled. But no reports would be generated to visualize the
+# results.
+
+navigator navbar {
+  hidereport @none
+}
+
+macro TaskTip [
+  tooltip istask() -8<-
+    '''Start: ''' <-query attribute='start'->
+    '''End: ''' <-query attribute='end'->
+    ----
+    '''Resources:'''
+
+    <-query attribute='resources'->
+    ----
+    '''Precursors: '''
+
+    <-query attribute='precursors'->
+    ----
+    '''Followers: '''
+
+    <-query attribute='followers'->
+    ----
+    '''Journal: '''
+
+    <-query attribute='journal'->
+    ->8-
+]
+
+textreport frame "" {
+  header -8<-
+    == Accounting Software Project ==
+    <[navigator id="navbar"]>
+  ->8-
+  footer "----"
+  textreport index "Overview" {
+    formats html
+    center '<[report id="overview"]>'
+  }
+}
+
+# A traditional Gantt chart with a project overview.
+taskreport overview "" {
+  header -8<-
+    === Project Overview ===
+
+    The project is structured into multiple tasks.
+
+    === Original Project Plan ===
+  ->8-
+  columns bsi { title 'WBS' },
+          name, start, end, effort,
+          resources, note, chart { ${TaskTip} }
+  timeformat "%Y-%m-%d"
+  loadunit days
+  hideresource @all
+  caption 'caption'
+
+  footer -8<-
+    === Notes ===
+  ->8-
+}
