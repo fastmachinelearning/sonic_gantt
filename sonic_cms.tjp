@@ -1,4 +1,4 @@
-project sonic_cms "SONIC in CMS" 2022-03-21 +1y {
+project sonic_cms "SONIC in CMS" 2022-01-01 +2y {
   # Set the default time zone for the project. If not specified, UTC
   # is used.
   timezone "America/Chicago"
@@ -26,25 +26,489 @@ resource patrick "Patrick McCormack" {
 resource yongbin "Yongbin Feng" {
 }
 
+resource nvidia "Triton team" {
+}
+
+resource nirmal "Nirmal Thomas" {
+}
+
+resource core "Core SW Team" {
+}
+
+resource compops "CompOps Team" {
+}
+
+resource burt "Burt Holzman" {
+}
+
+resource mlgroup "ML Group" {
+}
+
+resource stefan "Stefan Piperov" {
+}
+
+resource pdmv "PdmV Team" {
+}
+
 task miniaod "MiniAOD Porting" {
-	task pnet "ParticleNet" {
-		task present "ParticleNet presentation (JME)" {
-			start 2022-03-28
-			duration 1d
-			allocate patrick
-			complete 100
-			journalentry 2022-03-28 "link" {
-				author patrick
-				details "[https://indico.cern.ch/event/1143469/#34-particlenet-and-deepmet-wit]"
-			}
+	task present_jme "JME presentation" {
+		start 2022-03-28
+		duration 1d
+		allocate patrick
+		complete 100
+		journalentry 2022-03-28 "link" {
+			author patrick
+			details "[https://indico.cern.ch/event/1143469/#34-particlenet-and-deepmet-wit]"
 		}
-		task pr "ParticleNet PRs: CMSSW, cms-data" {
-			start 2022-03-29
-			duration 6d
-			allocate patrick
-			depends !present
-			complete 100
-			note "Organization of model files; modifier vs. customization function; update for minor SONIC interface changes in rebase"
+	}
+	task pnet "ParticleNet PRs: CMSSW, cms-data" {
+		start 2022-03-30
+		end 2022-06-30
+		allocate patrick
+		depends !present_jme, !!version.local_sync
+		complete 100
+		journalentry 2022-03-21 "notes" {
+			author kevin
+			details "Organization of model files; modifier vs. customization function; update for minor SONIC interface changes in rebase"
+		}
+		journalentry 2022-05-16 "links" {
+			author patrick
+			details "[https://github.com/cms-sw/cmssw/pull/37964], [https://github.com/cms-data/RecoBTag-Combined/pull/48]"
+		}
+	}
+	task deepmet "DeepMET PRs: CMSSW, cms-data" {
+		start 2022-03-30
+		end 2022-07-15
+		allocate patrick
+		depends !present_jme, !!version.local_sync
+		complete 100
+		journalentry 2022-03-21 "notes" {
+			author kevin
+			details "Organization of model files; modifier vs. customization function; update for minor SONIC interface changes in rebase"
+		}
+		journalentry 2022-05-16 "links" {
+			author patrick
+			details "[https://github.com/cms-sw/cmssw/pull/37963], [https://github.com/cms-data/RecoMET-METPUSubtraction/pull/6]"
+		}
+	}
+	task present_tau "TAU presentation" {
+		start 2022-03-21
+		duration 1d
+		allocate yongbin
+		complete 100
+		journalentry 2022-03-21 "link" {
+			author yongbin
+			details "[https://indico.cern.ch/event/1139426/#7-deeptauid-inference-with-son]"
+		}
+	}
+	task deeptau "DeepTau PRs: CMSSW, cms-data" {
+		start 2022-03-29
+		end 2022-12-31
+		allocate yongbin
+		depends !present_tau
+		complete 25
+		journalentry 2022-03-21 "notes" {
+			author kevin
+			details "Organization of model files; modifier vs. customization function; update for minor SONIC interface changes in rebase"
+		}
+		journalentry 2022-05-16 "links (pog)" {
+			author yongbin
+			details "[https://github.com/cms-tau-pog/cmssw/pull/159], [https://github.com/cms-tau-pog/RecoTauTag-TrainingFiles/pull/16]"
+		}
+	}
+}
+
+task ragged "Ragged batching" {
+	task ragged_client "Ragged batching client interface in Triton" {
+		start 2022-01-24
+		end 2022-03-29
+		allocate nvidia, kevin
+		complete 100
+		journalentry 2022-03-29 "notes" {
+			author kevin
+			details "[https://github.com/triton-inference-server/server/releases/tag/v2.20.0], ''''InferMulti'''' client API "
+		}
+	}
+	task ragged_sonic "Ragged batching in SonicTriton (dev)" {
+		start 2022-04-13
+		end 2022-08-04
+		allocate kevin
+		depends !ragged_client
+		complete 100
+		journalentry 2022-08-04 "notes" {
+			author kevin
+			details "[https://github.com/cms-sw/cmssw/compare/master...kpedro88:TritonRaggedBatching125X]"
+		}
+	}
+	task ragged_pnet "Ragged batching for ParticleNet (dev)" {
+		start 2022-04-29
+		end 2022-12-31
+		allocate nirmal
+		complete 75
+		journalentry 2022-03-21 "notes" {
+			author kevin
+			details "Including perf tests/comparisons"
+		}
+	}
+	task ragged_cmssw "Ragged batching in CMSSW" {
+		start 2023-01-01
+		duration 1m
+		allocate kevin, nirmal
+		depends !ragged_client, !ragged_sonic, !ragged_pnet, !!miniaod.pnet
+		complete 0
+	}
+	task nestedtensor "PyTorch NestedTensor support in Triton" {
+		start 2023-01-01
+		duration 1m
+		allocate nirmal, nvidia
+		complete 0
+		depends !!fallback.cpu_restrict_pt
+	}
+}
+
+task containers "Containers" {
+	task custom "Container customization" {
+		start 2023-01-01
+		duration 1m
+		allocate yongbin
+		complete 0
+		journalentry 2022-03-21 "notes" {
+			author kevin
+			details "Try to reduce resource footprints (disk, memory, etc.)"
+		}
+	}
+	task cmsbuild "Containers in cmsbuild" {
+		start 2023-02-01
+		duration 1w
+		allocate core
+		complete 0
+		depends !custom
+	}
+	task version_sync "Container version sync w/ CMSSW" {
+		start 2023-02-01
+		duration 1w
+		allocate yongbin
+		complete 0
+		depends !custom
+	}
+	task sites "Coordination of server container versions at sites" {
+		start 2023-02-08
+		duration 2m
+		allocate yongbin, compops
+		complete 0
+		depends !version_sync, !cmsbuild
+	}
+}
+
+task version "Versioning" {
+	task local_sync "Consistency between direct & SONIC producers" {
+		start 2022-03-29
+		duration 1d
+		allocate patrick
+		complete 100
+		journalentry 2022-05-31 "notes" {
+			author kevin
+			details "Direct inference modelfile directory (readable name) is symlink to modelfile directory (version number) in Triton model repository-style path"
+		}
+	}
+	task checksum_client "Client-side model checksum verification" {
+		start 2023-01-01
+		duration 1m
+		allocate nvidia
+		complete 0
+	}
+	task checksum_cmssw "Client-side model checksum in CMSSW" {
+		start 2023-02-01
+		duration 1m
+		allocate kevin
+		complete 0
+		depends !checksum_client
+	}
+	task provenance "Provenance tracking" {
+		start 2023-02-01
+		duration 1m
+		allocate patrick, core
+		complete 0
+		journalentry 2022-03-21 "notes" {
+			author kevin
+			details "model version/checksum, server URL?"
+		}
+	}
+}
+
+task auth "Authentication" {
+	task server "Triton server with OAuth" {
+		start 2023-01-01
+		duration 1w
+		allocate burt
+		complete 0
+	}
+	task cmssw "Authentication in CMSSW" {
+		start 2023-01-08
+		duration 2w
+		allocate kevin
+		complete 0
+		depends !server
+		journalentry 2022-03-21 "notes" {
+			author kevin
+			details "Obtain token from env var"
+		}
+	}
+}
+
+task fallback "Fallback" {
+	task cpu_setup "CPU usage test setup" {
+		start 2022-03-30
+		end 2022-04-04
+		allocate kevin
+		complete 100
+		journalentry 2022-03-21 "notes" {
+			author kevin
+			details "measure throughput w/ fully-loaded nodes and/or k8s cpu restrictions; also 'threading usage' (needs elaboration)"
+		}
+		journalentry 2022-04-04 "notes" {
+			author kevin
+			details "[https://github.com/fastmachinelearning/sonic-workflows/tree/cpu]"
+		}
+	}
+	task cpu_tests "CPU usage tests" {
+		start 2022-04-04
+		end 2022-11-01
+		allocate yongbin
+		complete 100
+		depends !cpu_setup
+		journalentry 2022-03-21 "notes" {
+			author kevin
+			details "Vary % of algorithms using SONIC"
+		}
+		journalentry 2022-11-16 "notes" {
+			author yongbin
+			details "[https://indico.cern.ch/event/1212347/#6-sonic-performance-studies-wi]"
+		}
+	}
+	task cpu_restrict "TF CPU restriction" {
+		start 2022-03-21
+		end 2022-11-08
+		allocate yongbin, mlgroup
+		complete 100
+	}
+	task cmssw "CPU optimizations in CMSSW" {
+		start 2022-11-16
+		duration 2w
+		allocate yongbin
+		complete 0
+		depends !cpu_tests, !cpu_restrict
+		journalentry 2022-11-16 "notes" {
+			author kevin
+			details "Script to create temporary model repository w/ number of model instances = number of threads, backend thread restrictions"
+		}
+	}
+	task cpu_memory "CPU server memory usage" {
+		start 2022-11-16
+		duration 1w
+		allocate yongbin
+		complete 0
+		depends !cpu_tests
+	}
+	task cpu_restrict_pt "PyTorch CPU restriction" {
+		start 2022-11-16
+		duration 1m
+		allocate nirmal, nvidia
+		complete 0
+		depends !cpu_tests, !cpu_restrict
+	}
+	task client_server "Change client's server in flight" {
+		start 2022-11-30
+		duration 2w
+		allocate yongbin
+		complete 0
+		journalentry 2022-03-21 "notes" {
+			author kevin
+			details "Client can get new server at any time"
+		}
+	}
+	task manual_retry "Manual retry schema" {
+		start 2022-12-14
+		duration 2w
+		allocate yongbin
+		complete 0
+		journalentry 2022-03-21 "notes" {
+			author kevin
+			details "Method to specify exact fallback instructions"
+		}
+	}
+	task auto_retry "Automatic retry" {
+		start 2023-01-01
+		duration 2w
+		allocate yongbin
+		complete 0
+		journalentry 2022-03-21 "notes" {
+			author kevin
+			details "Conditions to optimize server choice"
+		}
+	}
+}
+
+task perf "Performance" {
+	task triton "Triton profiling" {
+		start 2022-08-01
+		duration 6m
+		allocate patrick, yongbin
+		complete 25
+		journalentry 2022-03-21 "notes" {
+			author kevin
+			details "Streamline usage of perf_client, model analyzer"
+		}
+	}
+	task externalwork "Improve ExternalWork profiling" {
+		start 2023-01-01
+		duration 1m
+		allocate kevin, core
+		complete 0
+		journalentry 2022-03-21 "notes" {
+			author kevin
+			details "[https://github.com/cms-sw/cmssw/issues/29142]"
+		}
+	}
+	task scaling "Scaling" {
+		start 2022-08-01
+		duration 1m
+		allocate patrick
+		complete 0
+		journalentry 2022-03-21 "notes" {
+			author kevin
+			details "Vary: types of input data; CPU to GPU mapping"
+		}
+	}
+	task network "Network usage" {
+		start 2022-09-01
+		duration 1m
+		allocate patrick
+		complete 0
+		journalentry 2022-03-21 "notes" {
+			author kevin
+			details "Measure usage & establish requirements"
+		}
+	}
+	task memory "GPU server memory usage" {
+		start 2022-10-01
+		duration 1m
+		allocate patrick
+		complete 0
+		journalentry 2022-03-21 "notes" {
+			author kevin
+			details "Measure usage for local & remote servers"
+		}
+	}
+	task alloc "Local GPU memory allocation" {
+		start 2023-03-01
+		duration 1m
+		allocate kevin, core
+		complete 0
+		journalentry 2022-12-08 "notes" {
+			author kevin
+			details "Integrate local GPU server memory allocation & reporting w/ CMSSW GPU service (CachingAllocator)"
+		}
+	}
+}
+
+task ops "Operations" {
+	task sing_in_sing "Singularity-in-Singularity support" {
+		start 2022-12-01
+		duration 4m
+		allocate patrick, stefan, compops
+		complete 0
+		journalentry 2022-03-21 "notes" {
+			author kevin
+			details "Get more sites to support it (Singularity version, unprivileged user namespace setting)"
+		}
+	}
+	task preferred "Preferred inference server specification" {
+		start 2023-03-01
+		duration 6m
+		allocate compops
+		complete 0
+		journalentry 2022-03-21 "notes" {
+			author kevin
+			details "Sites put URL(s) in site local config"
+		}
+	}
+	task gateway "Gateway" {
+		start 2023-01-01
+		duration 3m
+		allocate burt,compops
+		complete 0
+		journalentry 2022-03-21 "notes" {
+			author kevin
+			details "Lightweight meta-server to provide/update server URLs for jobs (e.g. via puppet)"
+		}
+	}
+	task resource "Site resource allocation" {
+		start 2023-01-01
+		duration 6m
+		allocate compops
+		complete 0
+	}
+	task grid "Grid jobs" {
+		start 2022-11-01
+		duration 2m
+		allocate patrick, stefan
+		complete 10
+		journalentry 2022-11-01 "notes" {
+			author kevin
+			details "CRAB, CMS Connect submission"
+		}
+	}
+	task relval "Relval tests" {
+		start 2023-02-01
+		duration 2m
+		allocate pdmv
+		complete 0
+		depends !grid
+	}
+}
+
+task misc "Misc. features" {
+	task build "Server build improvements" {
+		start 2022-04-13
+		end 2022-08-08
+		allocate kevin, nvidia
+		complete 100
+		journalentry 2022-05-10 "notes" {
+			author kevin
+			details "[https://github.com/triton-inference-server/client/pull/95], [https://github.com/triton-inference-server/common/pull/47], [https://github.com/triton-inference-server/core/pull/60], [https://github.com/triton-inference-server/common/pull/48]"
+		}
+		journalentry 2022-08-08 "notes" {
+			author kevin
+			details "[https://github.com/triton-inference-server/client/pull/145]"
+		}
+	}
+	task compress "GPU compression" {
+		start 2023-02-01
+		duration 2m
+		allocate nvidia
+		complete 0
+	}
+	task custom "Handling of custom operations" {
+		start 2023-03-01
+		duration 1w
+		allocate kevin
+		complete 0
+	}
+	task logging "Logging API" {
+		start 2023-05-01
+		duration 1w
+		allocate nvidia
+		complete 0
+	}
+	task meta "Server metadata" {
+		start 2023-01-01
+		duration 2w
+		allocate kevin, nvidia
+		complete 0
+		journalentry 2022-12-08 "notes" {
+			author kevin
+			details "Identify if server is local, whether GPU is used; [https://github.com/triton-inference-server/server/issues/2872]"
 		}
 	}
 }
@@ -104,7 +568,7 @@ taskreport overview "" {
   ->8-
   columns bsi { title 'WBS' },
           name, start, end, effort,
-          resources, note, chart { ${TaskTip} }
+          resources { listitem "<-query attribute='name'->" }, note, chart { width 800 scale month ${TaskTip} }
   timeformat "%Y-%m-%d"
   loadunit days
   hideresource @all
