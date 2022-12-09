@@ -555,6 +555,11 @@ textreport frame "" {
     formats html
     center '<[report id="overview"]>'
   }
+  textreport "ResourceGraph" {
+    formats html
+    title "Resource Graph"
+    center '<[report id="resourceGraph"]>'
+  }
 }
 
 # A traditional Gantt chart with a project overview.
@@ -577,4 +582,15 @@ taskreport overview "" {
   footer -8<-
     === Notes ===
   ->8-
+}
+
+# A graph showing resource allocation. It identifies whether each
+# resource is under- or over-allocated for.
+resourcereport resourceGraph "" {
+  headline "Resource Allocation Graph"
+  columns no, name, effort, complete, weekly { width 800 ${TaskTip} }
+  loadunit shortauto
+  # We only like to show leaf tasks for leaf resources.
+  hidetask ~(isleaf() & isleaf_())
+  sorttasks plan.start.up
 }
