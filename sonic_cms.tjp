@@ -212,6 +212,18 @@ task containers "Containers" {
 		complete 0
 		depends !version_sync, !cmsbuild
 	}
+	task multiarch "Containers for different OS/arch" {
+		start 2023-02-08
+		duration 2w
+		allocate yongbin
+		limits { dailymax 1h }
+		complete 0
+		depends !custom
+		journalentry 2022-12-13 "notes" {
+			author kevin
+			details "Primarily for ARM; select proper container for fallback server based on SCRAM_ARCH?"
+		}
+	}
 }
 
 task version "Versioning" {
@@ -245,7 +257,7 @@ task version "Versioning" {
 		start 2023-02-01
 		duration 1m
 		allocate patrick, core
-		limits { dailymax 1h }
+		limits { dailymax 2h }
 		complete 0
 		journalentry 2022-03-21 "notes" {
 			author kevin
@@ -339,7 +351,7 @@ task fallback "Fallback" {
 		start 2022-11-16
 		duration 1m
 		allocate nirmal, nvidia
-		limits { dailymax 1h }
+		limits { dailymax 2h }
 		complete 0
 		depends !cpu_tests, !cpu_restrict
 	}
@@ -438,7 +450,7 @@ task perf "Performance" {
 		start 2023-03-01
 		duration 1m
 		allocate kevin, core
-		limits { dailymax 1h }
+		limits { dailymax 2h }
 		complete 0
 		journalentry 2022-12-08 "notes" {
 			author kevin
@@ -514,7 +526,7 @@ task misc "Misc. features" {
 		start 2022-04-13
 		end 2022-08-08
 		allocate kevin, nvidia
-		limits { dailymax 1h }
+		limits { dailymax 2h }
 		complete 100
 		journalentry 2022-05-10 "notes" {
 			author kevin
